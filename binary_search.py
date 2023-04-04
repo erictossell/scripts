@@ -4,6 +4,8 @@ class ScoreColor:
     def __init__(self, score, color):        
         self.score = score
         self.color = color
+    def __lt__(self, other):
+        return self.score < other.score
 
 def getScoreColors():
         scoreColors = []
@@ -17,35 +19,28 @@ def getScoreColors():
             print('Error: Score colors not found.')
         return scoreColors
 
-def binary_search(list, item):
-    
-    print('First item score value: ' + str(list[0].score))
-    print('Last item score value: ' + str(list[len(list)-1].score))
-    if item > int(list[0].score) or item < int(list[len(list)-1].score):
-       return None  
-    low = 0
-    high = len(list) - 1
-    
-    while low <= high:
-        mid = (low+high)//2        
-        guess = int(list[mid].score)        
-        highBound = int(list[mid-1].score)
-        lowBound = int(list[mid+1].score)  
-        print(guess)     
-        if guess == item:           
-            return list[mid].color
-        elif lowBound < item < highBound:            
-            return list[mid].color
-        elif guess > item:
-            low = mid - 1
-        elif guess < item:
-            high = mid + 1
-        else:
-            return None
+import bisect
+
+def binary_search_score_colors(score_color_list, item):
+    if not isinstance(item, int):
+        raise TypeError("item must be an integer")
+    for i in range(len(score_color_list) - 1):
+        if score_color_list[i].score < score_color_list[i + 1].score:
+            raise ValueError("score_color_list must be sorted in descending order by score")
+    index = bisect.bisect_left(score_color_list, ScoreColor(item, None))
+    if index == len(score_color_list):
+        return score_color_list[-1].color
+    if score_color_list[index].score == item:
+        return score_color_list[index].color
+    low_bound = score_color_list[index].score
+    high_bound = score_color_list[index - 1].score
+    if low_bound <= item <= high_bound:
+        return score_color_list[index].color
+    return score_color_list[-1].color
         
         
 
 list = getScoreColors()
 print('List Length:' + str(len(list)))
 
-print(binary_search(list, 2000))
+print(binary_search_score_colors(list, int(207.5)))
